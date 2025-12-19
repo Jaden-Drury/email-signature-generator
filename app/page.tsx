@@ -8,6 +8,18 @@ import { useState } from "react";
 export default function Home() {
   const [formState, setFormState] = useState<EmailSignatureFormData>(undefined);
 
+  async function copyHTML() {
+    // https://www.nikouusitalo.com/blog/why-isnt-clipboard-write-copying-my-richtext-html/
+    // CSS variables won't work with the CSS clipboard API it seems. So I'll have to get and render them manually in this function if I want to keep using them.
+    const previewHTML = document.getElementById("previewCard") as HTMLElement;
+    const clipboardItem = new ClipboardItem({
+      "text/plain": new Blob([previewHTML.innerText], { type: "text/plain" }),
+      "text/html": new Blob([previewHTML.outerHTML], { type: "text/html" }),
+    });
+
+    navigator.clipboard.write([clipboardItem]);
+  }
+
   return (
     <main className="flex flex-col w-full items-center m-4 ">
       <h1 className="text-4xl font-bold">Email Signature Generator</h1>
@@ -16,7 +28,7 @@ export default function Home() {
         <div className="flex flex-col gap-8">
           <PreviewCard formState={formState} />
           <div className="flex flex-row gap-4">
-            <Button onClick={() => console.log("copy")}>Copy HTML</Button>
+            <Button onClick={() => copyHTML()}>Copy HTML</Button>
             <Button onClick={() => console.log("download")}>
               Download as Image
             </Button>

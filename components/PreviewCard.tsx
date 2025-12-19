@@ -10,12 +10,18 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
   const belowFoldContent =
     formState?.phone || formState?.email || formState?.website;
 
+  // TODO: clean up these styles to make them safe for email clients (like inline styles)
+  //   https://www.caniemail.com/features/css-display-grid/
   return formState === undefined ? (
     <div className="border p-4 rounded-md w-[400px] flex items-center justify-center">
       <p className="text-gray-500">Preview will appear here</p>
     </div>
   ) : (
-    <div className="border p-4 text-sm grid grid-cols-[auto_auto_auto] gap-4 ">
+    <div
+      id="previewCard"
+      style={{ border: "1px solid black" }}
+      className="p-4 text-sm grid grid-cols-[auto_auto_auto] gap-4 "
+    >
       <Image
         src="https://www.placecats.com/neo/300/200"
         alt="Logo"
