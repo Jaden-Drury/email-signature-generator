@@ -2,6 +2,7 @@
 import EmailSignatureForm from "@/components/EmailSignatureForm";
 import PreviewCard from "@/components/PreviewCard";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { EmailSignatureFormData } from "@/schemas/EmailSignatureFormSchema";
 import { useState } from "react";
 
@@ -26,10 +27,18 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-8 p-8">
         <EmailSignatureForm formState={formState} setFormState={setFormState} />
         <div className="flex flex-col gap-8">
-          <PreviewCard formState={formState} />
+          <Card className="p-4">
+            <PreviewCard formState={formState} />
+          </Card>
           <div className="flex flex-row gap-4">
-            <Button onClick={() => copyHTML()}>Copy HTML</Button>
-            <Button onClick={() => console.log("download")}>
+            <Button disabled={!formState} onClick={() => copyHTML()}>
+              Copy HTML
+            </Button>
+            <Button
+              disabled={!formState}
+              onClick={() => console.log("download")}
+            >
+              {/* https://www.npmjs.com/package/html-to-image?activeTab=readme */}
               Download as Image
             </Button>
           </div>

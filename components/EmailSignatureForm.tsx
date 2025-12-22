@@ -6,8 +6,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 type EmailSignatureFormProps = {
   formState: EmailSignatureFormData | undefined;
@@ -17,16 +18,23 @@ type EmailSignatureFormProps = {
 type FormType = z.infer<typeof emailSignatureFormSchema>;
 
 export default function EmailSignatureForm({
+  formState,
   setFormState,
 }: EmailSignatureFormProps) {
   const defaultFormState: FormType = {
-    firstName: "Jaden",
-    lastName: "Drury",
+    name: "Jaden Drury",
     title: "Software Engineer",
     company: "Developer Inc.",
     phone: "555-123-4567",
     email: "jdrury@example.com",
     website: "example.com/jdrury",
+    displaySocialMediaIcons: true,
+    includeBackground: false,
+    backgroundColor: "#ffffffff",
+    includeBorder: false,
+    borderColor: "#000000",
+    borderWidth: "1",
+    fontSize: "12",
   };
 
   const form = useForm<FormType>({
@@ -56,11 +64,11 @@ export default function EmailSignatureForm({
       className="space-y-4"
     >
       <Controller
-        name="firstName"
+        name="name"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>First Name</FieldLabel>
+            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
             <Input
               {...field}
               id={field.name}
@@ -74,25 +82,7 @@ export default function EmailSignatureForm({
           </Field>
         )}
       />
-      <Controller
-        name="lastName"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Last Name</FieldLabel>
-            <Input
-              {...field}
-              id={field.name}
-              aria-invalid={fieldState.invalid}
-              placeholder="Doe"
-              autoComplete="family-name"
-              onBlur={() => updateState()}
-            />
 
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
       <Controller
         name="title"
         control={form.control}
@@ -189,7 +179,164 @@ export default function EmailSignatureForm({
         )}
       />
 
-      <p>Logo</p>
+      {/* Social Media Icon Settings */}
+      <Controller
+        name="displaySocialMediaIcons"
+        control={form.control}
+        render={({ field }) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>
+              Display Social Media Icons
+            </FieldLabel>
+            <div>
+              <Switch
+                checked={field.value}
+                id={field.name}
+                onCheckedChange={field.onChange}
+              />
+            </div>
+          </Field>
+        )}
+      />
+
+      {/* Background Settings */}
+      <div className="flex flex-row-reverse gap-4">
+        <Controller
+          name="includeBackground"
+          control={form.control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>Include Background</FieldLabel>
+              <div>
+                <Switch
+                  checked={field.value}
+                  id={field.name}
+                  onCheckedChange={field.onChange}
+                  onClick={() => updateState()}
+                />
+              </div>
+            </Field>
+          )}
+        />
+        {formState && formState.includeBackground && (
+          <Controller
+            name="backgroundColor"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-[50px]">
+                <FieldLabel htmlFor={field.name}>Background Color</FieldLabel>
+                <div>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    type="color"
+                    placeholder="#ffffff"
+                    onBlur={() => updateState()}
+                  />
+                </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        )}
+      </div>
+
+      {/* Border Settings */}
+      <div className="flex flex-row-reverse gap-4">
+        <Controller
+          name="includeBorder"
+          control={form.control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>Include Border</FieldLabel>
+              <div className="w-auto">
+                <Switch
+                  checked={field.value}
+                  id={field.name}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            </Field>
+          )}
+        />
+
+        {formState && formState.includeBorder && (
+          <>
+            <Controller
+              name="borderColor"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Border Color</FieldLabel>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    type="color"
+                    placeholder="#ffffff"
+                    onBlur={() => updateState()}
+                  />
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="borderWidth"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Border Width</FieldLabel>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    type="number"
+                    placeholder="1"
+                    onBlur={() => updateState()}
+                  />
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Font Size  */}
+      <Controller
+        name="fontSize"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Font Size</FieldLabel>
+            <Input
+              {...field}
+              id={field.name}
+              aria-invalid={fieldState.invalid}
+              type="number"
+              placeholder="12"
+              onBlur={(e) => {
+                if (!e.target.value) {
+                  field.onChange("12");
+                }
+                updateState();
+              }}
+            />
+
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
 
       <div className="flex flex-row gap-4">
         <Button type="button" variant="outline" onClick={clearForm}>
