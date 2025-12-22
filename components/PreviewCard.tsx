@@ -1,13 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 // html table structure was used with inline styles to maximize email client compatibility
-import {
-  encodedFacebookLogo,
-  encodedGithubLogo,
-  encodedInstagramLogo,
-  encodedLinkedinLogo,
-  encodedTwitterLogo,
-} from "@/public/Phosphor_Social_Icons/EncodedPhosphorIcons";
 import { EmailSignatureFormData } from "@/schemas/EmailSignatureFormSchema";
+import IconRow from "./IconRow";
 
 type PreviewCardProps = {
   formState: EmailSignatureFormData;
@@ -25,7 +19,7 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
     <table
       id="previewCard"
       style={{
-        width: "auto",
+        width: "fit-content",
         borderCollapse: "separate",
         borderSpacing: "8px",
         backgroundColor: formState?.includeBackground
@@ -40,14 +34,22 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
       <tbody>
         <tr>
           <td>
-            <img
-              src="https://www.placecats.com/neo/300/200"
-              alt="Logo"
-              width={150}
-              style={{ display: "block", paddingRight: "10px" }}
-            />
+            {/* Image */}
+            {formState.image.length > 0 && (
+              <div>
+                {formState.image.map((image, index) => (
+                  <img
+                    key={`image_${index}`}
+                    src={image.value}
+                    alt="Logo"
+                    width={120}
+                    height={120}
+                  />
+                ))}
+              </div>
+            )}
           </td>
-          <td style={{ verticalAlign: "top" }}>
+          <td>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
                 <tr>
@@ -139,63 +141,21 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
               </tbody>
             </table>
           </td>
-          {/* Icons */}
-          {/* More work needed to get this completely working, right now it will render on paste but not as an email signature in gmail */}
-          {/* https://stackoverflow.com/questions/9110091/base64-encoded-images-in-email-signatures */}
-          {formState.displaySocialMediaIcons && (
-            <td style={{ verticalAlign: "center" }}>
-              <table style={{ height: "100%" }}>
-                <tbody>
-                  <tr>
-                    <td>
-                      <img
-                        src={encodedLinkedinLogo}
-                        alt="LinkedIn Logo"
-                        width={25}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img
-                        src={encodedInstagramLogo}
-                        alt="Instagram Logo"
-                        width={25}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img
-                        src={encodedTwitterLogo}
-                        alt="Twitter Logo"
-                        width={25}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img
-                        src={encodedFacebookLogo}
-                        alt="Facebook Logo"
-                        width={25}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img
-                        src={encodedGithubLogo}
-                        alt="Github Logo"
-                        width={25}
-                      />{" "}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Icons Right*/}
+          {formState.icons.length > 0 && formState.iconPosition === "right" && (
+            <td>
+              <IconRow formState={formState} />
             </td>
           )}
         </tr>
+        {/* Icons Bottom*/}
+        {formState.icons.length > 0 && formState.iconPosition === "bottom" && (
+          <tr>
+            <td colSpan={2}>
+              <IconRow formState={formState} />
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

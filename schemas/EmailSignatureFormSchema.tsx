@@ -11,7 +11,21 @@ export const emailSignatureFormSchema = z.object({
   phone: z.string(),
   email: z.string(),
   website: z.string(),
-  displaySocialMediaIcons: z.boolean().optional(),
+  image: z
+    .array(
+      z.object({
+        value: z.url("Must be a valid URL").optional(),
+      })
+    )
+    .length(1),
+  icons: z.array(
+    z.object({
+      value: z.url("Must be a valid URL").optional(),
+    })
+  ),
+  displayIcons: z.boolean().optional(),
+  iconPosition: z.enum(["right", "bottom"]).optional(),
+  iconAlignment: z.enum(["start", "center", "end"]).optional(),
   includeBackground: z.boolean().optional(),
   backgroundColor: z.string().optional(),
   includeBorder: z.boolean().optional(),
