@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmailSignatureFormData } from "@/schemas/EmailSignatureFormSchema";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const [formState, setFormState] = useState<EmailSignatureFormData>(undefined);
@@ -19,6 +20,7 @@ export default function Home() {
     });
 
     navigator.clipboard.write([clipboardItem]);
+    toast.success("HTML copied to clipboard!");
   }
 
   return (
@@ -34,10 +36,7 @@ export default function Home() {
             <Button disabled={!formState} onClick={() => copyHTML()}>
               Copy HTML
             </Button>
-            <Button
-              disabled={!formState}
-              onClick={() => console.log("download")}
-            >
+            <Button disabled={true} onClick={() => console.log("download")}>
               {/* https://www.npmjs.com/package/html-to-image?activeTab=readme */}
               Download as Image
             </Button>
