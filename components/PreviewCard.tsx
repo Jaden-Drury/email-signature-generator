@@ -4,7 +4,7 @@ import { EmailSignatureFormData } from "@/schemas/EmailSignatureFormSchema";
 import IconRow from "./IconRow";
 
 type PreviewCardProps = {
-  formState: EmailSignatureFormData;
+  formState: EmailSignatureFormData | undefined;
 };
 
 export default function PreviewCard({ formState }: PreviewCardProps) {
@@ -42,8 +42,12 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
                     key={`image_${index}`}
                     src={image.value}
                     alt="Logo"
-                    width={120}
-                    height={120}
+                    style={{
+                      maxWidth: "120px",
+                      maxHeight: "120px",
+                      height: "auto",
+                      width: "auto",
+                    }}
                   />
                 ))}
               </div>

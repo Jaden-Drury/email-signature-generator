@@ -1,15 +1,22 @@
+import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   EmailSignatureFormData,
   emailSignatureFormSchema,
 } from "@/schemas/EmailSignatureFormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { InfoIcon, PlusIcon, XIcon } from "lucide-react";
+import { useCallback, useEffect } from "react";
+import {
+  Controller,
+  FieldErrors,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -17,12 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { PlusIcon, XIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 type EmailSignatureFormProps = {
   formState: EmailSignatureFormData | undefined;
-  setFormState: (formState: EmailSignatureFormData) => void;
+  setFormState: (formState: EmailSignatureFormData | undefined) => void;
+  setErrors: (errors: FieldErrors<FormType>) => void;
 };
 
 type FormType = z.infer<typeof emailSignatureFormSchema>;
@@ -30,25 +38,22 @@ type FormType = z.infer<typeof emailSignatureFormSchema>;
 export default function EmailSignatureForm({
   formState,
   setFormState,
+  setErrors,
 }: EmailSignatureFormProps) {
   const defaultFormState: FormType = {
-    image: [{ value: "https://placehold.co/200x200" }],
-    icons: [
-      { value: "https://placehold.co/25x25" },
-      { value: "https://placehold.co/25x25" },
-      { value: "https://placehold.co/25x25" },
-    ],
-    name: "Jaden Drury",
-    title: "Software Engineer",
-    company: "Developer Inc.",
-    phone: "555-123-4567",
-    email: "jdrury@example.com",
-    website: "example.com/jdrury",
+    image: [],
+    icons: [],
+    name: "",
+    title: "",
+    company: "",
+    phone: "",
+    email: "",
+    website: "",
     iconPosition: "right",
     iconAlignment: "center",
     includeBackground: true,
     backgroundColor: "#ffffffff",
-    includeBorder: true,
+    includeBorder: false,
     borderColor: "#000000",
     borderWidth: "1",
     fontSize: "12",
@@ -57,6 +62,7 @@ export default function EmailSignatureForm({
   const form = useForm<FormType>({
     resolver: zodResolver(emailSignatureFormSchema),
     defaultValues: defaultFormState,
+    mode: "all",
   });
 
   const {
@@ -77,19 +83,34 @@ export default function EmailSignatureForm({
     name: "image",
   });
 
-  //   Updates the parent form state on blur of each field
-  function updateState() {
-    setFormState(form.getValues());
-  }
+  const [backgroundEnabled, borderEnabled, iconPosition] = useWatch({
+    control: form.control,
+    name: ["includeBackground", "includeBorder", "iconPosition"],
+  });
+
+  //   Formstate is updated onBlur of each field
+  // There is a bug with this
+  // because onBlur event happens before this updateState, I can't leverate the isDirty properties to know if the form is valid or not
+  // So I have to check the formState errors directly
+  // A better way would be to have the formState updated onChange of each field, but that would be too many updates
+  const updateState = useCallback(() => {
+    console.log("Updating form state...");
+    const hasErrors = Object.keys(form.formState.errors).length > 0;
+
+    if (hasErrors) {
+      console.log("form has errors, setting formState to undefined");
+      setFormState(undefined);
+    } else {
+      console.log("form is valid, updating formState");
+      const currentValues = form.getValues();
+      console.log("currentValues:", currentValues);
+      setFormState(currentValues);
+    }
+  }, [form, setFormState]);
 
   useEffect(() => {
-    updateState();
-  }, []); // Run only once on mount
-
-  function onSubmit(data: z.infer<typeof emailSignatureFormSchema>) {
-    setFormState(form.getValues());
-    console.log(data);
-  }
+    setErrors(form.formState.errors);
+  }, [form.formState.errors, setErrors]);
 
   function clearForm() {
     form.reset();
@@ -99,8 +120,8 @@ export default function EmailSignatureForm({
   return (
     <form
       id="form-rhf-demo"
-      onSubmit={form.handleSubmit(onSubmit)}
       className="space-y-4"
+      onSubmit={(e) => e.preventDefault()}
     >
       <div className="grid grid-cols-2 gap-4">
         {/* Name */}
@@ -109,14 +130,20 @@ export default function EmailSignatureForm({
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+              <FieldLabel htmlFor={field.name}>
+                Name <span className="text-destructive">*</span>
+              </FieldLabel>
               <Input
+                required
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
                 placeholder="John"
                 autoComplete="given-name"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -136,7 +163,10 @@ export default function EmailSignatureForm({
                 aria-invalid={fieldState.invalid}
                 placeholder="Software Engineer"
                 autoComplete="organization-title"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -155,7 +185,10 @@ export default function EmailSignatureForm({
                 aria-invalid={fieldState.invalid}
                 placeholder="Software Engineer"
                 autoComplete="organization-title"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -174,7 +207,10 @@ export default function EmailSignatureForm({
                 aria-invalid={fieldState.invalid}
                 placeholder="(123) 456-7890"
                 autoComplete="tel"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -193,7 +229,10 @@ export default function EmailSignatureForm({
                 aria-invalid={fieldState.invalid}
                 placeholder="john.doe@example.com"
                 autoComplete="email"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -212,7 +251,10 @@ export default function EmailSignatureForm({
                 aria-invalid={fieldState.invalid}
                 placeholder="https://example.com"
                 autoComplete="url"
-                onBlur={() => updateState()}
+                onBlur={() => {
+                  field.onBlur();
+                  updateState();
+                }}
               />
 
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -220,151 +262,233 @@ export default function EmailSignatureForm({
           )}
         />
       </div>
-
       <Separator />
-
       {/* Icons and images Settings */}
-      {/* TODO: add information section about hosting images and explain they may not render for all email clients */}
       {/* Image */}
       {imageFields.map((field, index) => (
-        <Controller
-          key={field.id}
-          name={`image.${index}.value`}
-          control={form.control}
-          render={({ field }) => (
-            <Field
-              key={field.name} // important to include key with field's id
-            >
-              <span className="flex flex-row gap-4">
-                <FieldLabel htmlFor={field.value}>Image {index + 1}</FieldLabel>
-                <Button
-                  aria-label={`Remove Image ${index + 1}`}
-                  type="button"
-                  variant="link"
-                  size="icon"
-                  onClick={() => {
-                    deleteImage(index);
+        <div key={field.id} className="space-y-2">
+          <Controller
+            name={`image.${index}.value`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field key={field.name} data-invalid={fieldState.invalid}>
+                <span className="flex flex-row gap-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon size={20} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[300px] ">
+                        Choose a url for the primary image/logo you want to
+                        display. Make sure the URL is publicly accessible to
+                        help ensure email clients render it. Note, some company
+                        email security settings still may block images from
+                        rendering. Provide alt text that clearly conveys
+                        important information you may be using the image to
+                        convey. For more information writing alt text visit{" "}
+                        <a
+                          className="text-chart-5"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href="https://www.w3.org/WAI/tutorials/images/"
+                        >
+                          w3.org
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <FieldLabel htmlFor={field.value}>
+                    Image {index + 1} URL{" "}
+                    <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Button
+                    aria-label={`Remove Image ${index + 1}`}
+                    type="button"
+                    variant="link"
+                    size="icon"
+                    onClick={() => {
+                      deleteImage(index);
+                      updateState();
+                    }}
+                    className="text-destructive cursor-pointer"
+                  >
+                    <XIcon />
+                  </Button>
+                </span>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="www.example.com/image-url"
+                  onBlur={() => {
+                    field.onBlur();
                     updateState();
                   }}
-                  className="text-red-500 cursor-pointer"
-                >
-                  <XIcon />
-                </Button>
-              </span>
-              <Input
-                {...field}
-                id={field.name}
-                placeholder="www.example.com/image-url"
-                onBlur={() => updateState()}
-              />
-            </Field>
-          )}
-        />
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          {/* Image Alt text */}
+          <Controller
+            name={`image.${index}.altText`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field key={field.name} data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.value}>
+                  Image {index + 1} Alt Text{" "}
+                  <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="Description of the image"
+                  onBlur={() => {
+                    field.onBlur();
+                    updateState();
+                  }}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
       ))}
+      {/* Add Image Button */}
       <Button
         type="button"
         variant="outline"
         onClick={() => {
-          appendImage({ value: "https://placehold.co/200x200" });
+          appendImage({ value: "https://placehold.co/200x200", altText: "" });
         }}
         disabled={formState?.image && formState?.image.length >= 1}
       >
         Add Image <PlusIcon />
       </Button>
-
       <Separator />
-
       {/* Icons */}
       {iconFields.map((field, index) => (
-        <Controller
-          key={field.id}
-          name={`icons.${index}.value`}
-          control={form.control}
-          render={({ field }) => (
-            <Field
-              key={field.name} // important to include key with field's id
-            >
-              <span className="flex flex-row gap-4">
-                <FieldLabel htmlFor={field.value}>Icon {index + 1}</FieldLabel>
-                <Button
-                  aria-label={`Remove Icon ${index + 1}`}
-                  type="button"
-                  variant="link"
-                  size="icon"
-                  onClick={() => {
-                    deleteIcon(index);
+        <div key={field.id} className="space-y-2">
+          <Controller
+            name={`icons.${index}.value`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field key={field.name} data-invalid={fieldState.invalid}>
+                <span className="flex flex-row gap-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon size={20} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[300px] ">
+                        Choose a url for the icon you want to display. Make sure
+                        the URL is publicly accessible to help ensure email
+                        clients render it. Note, some email security settings
+                        may block images from rendering. Provide alt text that
+                        clearly conveys important information you may be using
+                        the icon to convey.For more information writing alt text
+                        visit{" "}
+                        <a
+                          className="text-chart-5"
+                          href="https://www.w3.org/WAI/tutorials/images/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          w3.org
+                        </a>
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <FieldLabel htmlFor={field.value}>
+                    Icon {index + 1} URL{" "}
+                    <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Button
+                    aria-label={`Remove Icon ${index + 1}`}
+                    type="button"
+                    variant="link"
+                    size="icon"
+                    onClick={() => {
+                      deleteIcon(index);
+                      updateState();
+                    }}
+                    className="text-destructive cursor-pointer"
+                  >
+                    <XIcon />
+                  </Button>
+                </span>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="www.example.com/icon-url"
+                  onBlur={() => {
+                    field.onBlur();
                     updateState();
                   }}
-                  className="text-red-500 cursor-pointer"
-                >
-                  <XIcon />
-                </Button>
-              </span>
-              <Input
-                {...field}
-                id={field.name}
-                placeholder="www.example.com/icon-url"
-                onBlur={() => updateState()}
-              />
-            </Field>
-          )}
-        />
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          {/* Icon Alt text */}
+          <Controller
+            name={`icons.${index}.altText`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field key={field.name} data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.value}>
+                  Icon {index + 1} Alt Text{" "}
+                  <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="Description of the icon"
+                  onBlur={() => {
+                    field.onBlur();
+                    updateState();
+                  }}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
       ))}
-
+      {/* Add Icon Button */}
       <Button
         type="button"
         variant="outline"
         onClick={() => {
-          appendIcon({ value: "https://placehold.co/25x25" });
+          appendIcon({
+            value: "https://placehold.co/25x25",
+            altText: "",
+          });
         }}
         disabled={formState?.icons && formState?.icons.length >= 5}
       >
         Add Icon <PlusIcon />
       </Button>
-
-      <div className="flex flex-row gap-4">
-        <Controller
-          name="iconPosition"
-          control={form.control}
-          render={({ field }) => (
-            <Field
-              onChange={(e) => {
-                field.onChange(e);
-                updateState();
-              }}
-            >
-              <FieldLabel htmlFor={field.name}>Icon Position</FieldLabel>
-              <Select
-                value={field.value}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  updateState();
-                }}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Icon Position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="right">Right</SelectItem>
-                  <SelectItem value="bottom">Bottom</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-        />
-
-        {formState && formState.iconPosition === "bottom" && (
+      {/* Icons positions */}
+      {iconFields.length > 0 && (
+        <div className="flex flex-row gap-4">
           <Controller
-            name="iconAlignment"
+            name="iconPosition"
             control={form.control}
             render={({ field }) => (
-              <Field
-                onChange={(e) => {
-                  field.onChange(e);
-                  updateState();
-                }}
-              >
-                <FieldLabel htmlFor={field.name}>Icon Alignment</FieldLabel>
+              <Field>
+                <FieldLabel htmlFor={field.name}>Icon Position</FieldLabel>
                 <Select
                   value={field.value}
                   onValueChange={(value) => {
@@ -373,22 +497,47 @@ export default function EmailSignatureForm({
                   }}
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Icon Alignment" />
+                    <SelectValue placeholder="Icon Position" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="start">Start</SelectItem>
-                    <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="end">End</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                    <SelectItem value="bottom">Bottom</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
             )}
           />
-        )}
-      </div>
 
+          {iconPosition === "bottom" && (
+            <Controller
+              name="iconAlignment"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>Icon Alignment</FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      updateState();
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Icon Alignment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="start">Start</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                      <SelectItem value="end">End</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+          )}
+        </div>
+      )}
       <Separator />
-
       {/* Background Settings */}
       <div className="flex flex-row-reverse gap-4">
         <Controller
@@ -410,7 +559,7 @@ export default function EmailSignatureForm({
             </Field>
           )}
         />
-        {formState && formState.includeBackground && (
+        {backgroundEnabled && (
           <Controller
             name="backgroundColor"
             control={form.control}
@@ -423,7 +572,10 @@ export default function EmailSignatureForm({
                   aria-invalid={fieldState.invalid}
                   type="color"
                   placeholder="#ffffff"
-                  onBlur={() => updateState()}
+                  onBlur={() => {
+                    field.onBlur();
+                    updateState();
+                  }}
                   className="max-w-[130px] min-w-[50px]"
                 />
                 {fieldState.invalid && (
@@ -434,7 +586,6 @@ export default function EmailSignatureForm({
           />
         )}
       </div>
-
       {/* Border Settings */}
       <div className="flex flex-row-reverse gap-4">
         <Controller
@@ -457,7 +608,7 @@ export default function EmailSignatureForm({
           )}
         />
 
-        {formState && formState.includeBorder && (
+        {borderEnabled && (
           <>
             <Controller
               name="borderWidth"
@@ -471,7 +622,17 @@ export default function EmailSignatureForm({
                     aria-invalid={fieldState.invalid}
                     type="number"
                     placeholder="1"
-                    onBlur={() => updateState()}
+                    min={1}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      if (!e.target.value) {
+                        field.onChange("1");
+                      }
+                      if (parseInt(e.target.value) < 1) {
+                        field.onChange("1");
+                      }
+                      updateState();
+                    }}
                   />
 
                   {fieldState.invalid && (
@@ -493,7 +654,10 @@ export default function EmailSignatureForm({
                     aria-invalid={fieldState.invalid}
                     type="color"
                     placeholder="#ffffff"
-                    onBlur={() => updateState()}
+                    onBlur={() => {
+                      field.onBlur();
+                      updateState();
+                    }}
                     className="max-w-[130px] min-w-[50px]"
                   />
 
@@ -506,7 +670,6 @@ export default function EmailSignatureForm({
           </>
         )}
       </div>
-
       {/* Font Size  */}
       <Controller
         name="fontSize"
@@ -520,9 +683,14 @@ export default function EmailSignatureForm({
               aria-invalid={fieldState.invalid}
               type="number"
               placeholder="12"
+              min={10}
               onBlur={(e) => {
+                field.onBlur();
                 if (!e.target.value) {
                   field.onChange("12");
+                }
+                if (parseInt(e.target.value) < 10) {
+                  field.onChange("10");
                 }
                 updateState();
               }}
@@ -532,15 +700,17 @@ export default function EmailSignatureForm({
           </Field>
         )}
       />
-
       <div className="flex flex-row gap-4">
-        <Button type="button" variant="outline" onClick={clearForm}>
-          Clear
+        <Button
+          type="button"
+          variant="outline"
+          className="text-destructive"
+          onClick={clearForm}
+        >
+          Reset Form
         </Button>
-
-        <Button type="submit" form="form-rhf-demo">
-          Submit
-        </Button>
+        {/* The submit button doesn't need to trigger any actions since the form handles everything onChange or onBlur. It does give users a focus to switch to if a field is set to onBlur and needs a new focus to trigger it's changes */}
+        <Button type="submit">Submit</Button>
       </div>
     </form>
   );

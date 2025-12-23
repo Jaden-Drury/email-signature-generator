@@ -1,8 +1,6 @@
 import * as z from "zod";
 
-export type EmailSignatureFormData =
-  | z.infer<typeof emailSignatureFormSchema>
-  | undefined;
+export type EmailSignatureFormData = z.infer<typeof emailSignatureFormSchema>;
 
 export const emailSignatureFormSchema = z.object({
   name: z.string().min(1, "Name must be at least 1 character."),
@@ -14,13 +12,15 @@ export const emailSignatureFormSchema = z.object({
   image: z
     .array(
       z.object({
-        value: z.url("Must be a valid URL").optional(),
+        value: z.url("Must be a valid URL"),
+        altText: z.string().min(1, "Alt text is required"),
       })
     )
     .length(1),
   icons: z.array(
     z.object({
-      value: z.url("Must be a valid URL").optional(),
+      value: z.url("Must be a valid URL"),
+      altText: z.string().min(1, "Alt text is required"),
     })
   ),
   displayIcons: z.boolean().optional(),
