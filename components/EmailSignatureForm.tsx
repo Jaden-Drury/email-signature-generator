@@ -88,22 +88,13 @@ export default function EmailSignatureForm({
     name: ["includeBackground", "includeBorder", "iconPosition"],
   });
 
-  //   Formstate is updated onBlur of each field
-  // There is a bug with this
-  // because onBlur event happens before this updateState, I can't leverate the isDirty properties to know if the form is valid or not
-  // So I have to check the formState errors directly
-  // A better way would be to have the formState updated onChange of each field, but that would be too many updates
   const updateState = useCallback(() => {
-    console.log("Updating form state...");
     const hasErrors = Object.keys(form.formState.errors).length > 0;
 
     if (hasErrors) {
-      console.log("form has errors, setting formState to undefined");
       setFormState(undefined);
     } else {
-      console.log("form is valid, updating formState");
       const currentValues = form.getValues();
-      console.log("currentValues:", currentValues);
       setFormState(currentValues);
     }
   }, [form, setFormState]);
@@ -298,16 +289,16 @@ export default function EmailSignatureForm({
                     </TooltipContent>
                   </Tooltip>
                   <FieldLabel htmlFor={field.value}>
-                    Image {index + 1} URL{" "}
-                    <span className="text-destructive">*</span>
+                    Image URL <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Button
                     aria-label={`Remove Image ${index + 1}`}
                     type="button"
                     variant="link"
                     size="icon"
-                    onClick={() => {
+                    onClick={async () => {
                       deleteImage(index);
+                      await form.trigger();
                       updateState();
                     }}
                     className="text-destructive cursor-pointer"
@@ -338,8 +329,7 @@ export default function EmailSignatureForm({
             render={({ field, fieldState }) => (
               <Field key={field.name} data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.value}>
-                  Image {index + 1} Alt Text{" "}
-                  <span className="text-destructive">*</span>
+                  Image Alt Text <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Input
                   {...field}
@@ -363,8 +353,11 @@ export default function EmailSignatureForm({
       <Button
         type="button"
         variant="outline"
-        onClick={() => {
+        onClick={async () => {
           appendImage({ value: "https://placehold.co/200x200", altText: "" });
+          // Trigger validation after adding image to catch empty alt text cases
+          await form.trigger();
+          updateState();
         }}
         disabled={formState?.image && formState?.image.length >= 1}
       >
@@ -413,8 +406,9 @@ export default function EmailSignatureForm({
                     type="button"
                     variant="link"
                     size="icon"
-                    onClick={() => {
+                    onClick={async () => {
                       deleteIcon(index);
+                      await form.trigger();
                       updateState();
                     }}
                     className="text-destructive cursor-pointer"
@@ -470,11 +464,14 @@ export default function EmailSignatureForm({
       <Button
         type="button"
         variant="outline"
-        onClick={() => {
+        onClick={async () => {
           appendIcon({
             value: "https://placehold.co/25x25",
             altText: "",
           });
+          // Trigger validation after adding image to catch empty alt text cases
+          await form.trigger();
+          updateState();
         }}
         disabled={formState?.icons && formState?.icons.length >= 5}
       >
@@ -694,6 +691,7 @@ export default function EmailSignatureForm({
                 }
                 updateState();
               }}
+              className="max-w-[200px]"
             />
 
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

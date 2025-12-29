@@ -16,7 +16,7 @@ export const emailSignatureFormSchema = z.object({
         altText: z.string().min(1, "Alt text is required"),
       })
     )
-    .length(1),
+    .max(1),
   icons: z.array(
     z.object({
       value: z.url("Must be a valid URL"),

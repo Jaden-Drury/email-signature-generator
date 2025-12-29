@@ -30,9 +30,6 @@ export default function Home() {
       <h1 className="text-4xl font-bold">Email Signature Generator</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
         <Card className="p-4">
-          Errors: {JSON.stringify(errors)}
-          <br />
-          formState: {JSON.stringify(formState)}
           <EmailSignatureForm
             formState={formState}
             setFormState={setFormState}

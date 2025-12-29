@@ -13,7 +13,9 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
 
   return formState === undefined ? (
     <div className="flex items-center justify-center">
-      <p className="text-gray-500">Preview will appear here</p>
+      <p className="text-gray-500">
+        Preview will appear here once form is valid
+      </p>
     </div>
   ) : (
     <table
