@@ -4,6 +4,8 @@ A web-based tool for creating professional email signatures. Customize your sign
 
 Built with Next.js and designed to be deployed as a [single page application](https://nextjs.org/docs/app/guides/single-page-applications).
 
+View the application as deployed via github actions, [here](https://jaden-drury.github.io/email-signature-generator/)
+
 ## Features
 
 - **HTML Export**: Generate clean, accessible HTML for use in email clients
