@@ -573,7 +573,6 @@ export default function EmailSignatureForm({
                     field.onBlur();
                     updateState();
                   }}
-                  className="max-w-[130px] min-w-[50px]"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -611,7 +610,7 @@ export default function EmailSignatureForm({
               name="borderWidth"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} className="w-auto">
                   <FieldLabel htmlFor={field.name}>Border Width</FieldLabel>
                   <Input
                     {...field}
@@ -643,7 +642,7 @@ export default function EmailSignatureForm({
               name="borderColor"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} className="w-auto">
                   <FieldLabel htmlFor={field.name}>Border Color</FieldLabel>
                   <Input
                     {...field}
@@ -655,7 +654,6 @@ export default function EmailSignatureForm({
                       field.onBlur();
                       updateState();
                     }}
-                    className="max-w-[130px] min-w-[50px]"
                   />
 
                   {fieldState.invalid && (

@@ -35,9 +35,9 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
     >
       <tbody>
         <tr>
-          <td>
-            {/* Image */}
-            {formState.image.length > 0 && (
+          {/* Image */}
+          {formState.image.length > 0 && (
+            <td>
               <div>
                 {formState.image.map((image, index) => (
                   <img
@@ -53,8 +53,8 @@ export default function PreviewCard({ formState }: PreviewCardProps) {
                   />
                 ))}
               </div>
-            )}
-          </td>
+            </td>
+          )}
           <td>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>

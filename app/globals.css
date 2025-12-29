@@ -126,3 +126,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+input[type="color"] {
+  width: 130px;
+  max-width: 130px;
+  min-width: 130px;
+}
+
+input[type="number"] {
+  width: 130px;
+  max-width: 130px;
+  min-width: 130px;
+}
