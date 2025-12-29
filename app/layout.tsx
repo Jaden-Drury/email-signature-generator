@@ -32,7 +32,7 @@ export default function RootLayout({
         <Toaster />
         <footer className="w-full text-center py-4 bg-muted-foreground ">
           Created by Jaden Drury on{" "}
-          <a className="text-primary" href="https://github.com/jdrury">
+          <a className="text-primary" href="https://github.com/Jaden-Drury">
             Github
           </a>
         </footer>
