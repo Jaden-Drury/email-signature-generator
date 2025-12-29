@@ -30,6 +30,12 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
+        <footer className="w-full text-center py-4 bg-muted-foreground ">
+          Created by Jaden Drury on{" "}
+          <a className="text-primary" href="https://github.com/jdrury">
+            Github
+          </a>
+        </footer>
       </body>
     </html>
   );
