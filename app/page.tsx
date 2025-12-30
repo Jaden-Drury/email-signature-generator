@@ -65,9 +65,11 @@ export default function Home() {
   );
 
   return (
-    <main className="flex flex-col items-center m-4 ">
-      <h1 className="text-4xl font-bold">Email Signature Generator</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+    <main className="flex flex-col px-12 pb-4 gap-4 w-full ">
+      <h1 className="sm:text-3xl lg:text-4xl font-bold">
+        Email Signature Generator
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="p-4">
           <EmailSignatureForm
             formState={formState}
@@ -81,39 +83,40 @@ export default function Home() {
               <PreviewCard formState={formState} />
             </div>
           </Card>
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <Button
               disabled={!formState || Object.keys(errors).length > 0}
               onClick={() => copyHTML()}
             >
               Copy HTML
             </Button>
-            <Button
-              variant="outline"
-              disabled={!formState || Object.keys(errors).length > 0}
-              onClick={() => downloadImage(fileType)}
-            >
-              {/* https://www.npmjs.com/package/html-to-image?activeTab=readme */}
-              {/* https://www.npmjs.com/package/@jpinsonneau/html-to-image package was used instead due to the maintainer of the previous packages no longer being around. */}
-              {/* https://github.com/bubkoo/html-to-image/pull/547 */}
-              {/* TODO: evaluate if this is really what I want to do or if I want to fork my own version or manually fix the bug */}
-              Download
-            </Button>
-            <Select
-              defaultValue={fileType}
-              onValueChange={(e) => setFileType(e as FileType)}
-            >
-              <SelectTrigger className="w-auto">
-                <SelectValue placeholder="Select file type" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(FileType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type.toUpperCase()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col md:flex-row gap-4">
+              <Button
+                variant="outline"
+                disabled={!formState || Object.keys(errors).length > 0}
+                onClick={() => downloadImage(fileType)}
+              >
+                {/* https://www.npmjs.com/package/html-to-image?activeTab=readme */}
+                {/* https://www.npmjs.com/package/@jpinsonneau/html-to-image package was used instead due to the maintainer of the previous packages no longer being around. */}
+                {/* https://github.com/bubkoo/html-to-image/pull/547 */}
+                Download
+              </Button>
+              <Select
+                defaultValue={fileType}
+                onValueChange={(e) => setFileType(e as FileType)}
+              >
+                <SelectTrigger className="w-auto">
+                  <SelectValue placeholder="Select file type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(FileType).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="flex flex-col gap-4">
             <p>

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,18 +26,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster />
-        <footer className="w-full text-center py-4 bg-muted-foreground ">
-          Created by Jaden Drury on{" "}
-          <a className="text-primary" href="https://github.com/Jaden-Drury">
-            Github
-          </a>
-        </footer>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="w-full flex flex-row justify-end pt-2 px-2">
+            <ThemeSwitch />
+          </div>
+          {children}
+          <Toaster />
+          <footer className="w-full flex flex-row gap-4 justify-center items-center py-4  bg-card-foreground text-card">
+            <p>Created by Jaden Drury on </p>
+            <a href="https://github.com/Jaden-Drury">Github</a>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

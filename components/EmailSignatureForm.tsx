@@ -114,7 +114,7 @@ export default function EmailSignatureForm({
       className="space-y-4"
       onSubmit={(e) => e.preventDefault()}
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Name */}
         <Controller
           name="name"
@@ -129,7 +129,7 @@ export default function EmailSignatureForm({
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
-                placeholder="John"
+                placeholder="John Doe"
                 autoComplete="given-name"
                 onBlur={() => {
                   field.onBlur();
@@ -174,7 +174,7 @@ export default function EmailSignatureForm({
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
-                placeholder="Software Engineer"
+                placeholder="Company"
                 autoComplete="organization-title"
                 onBlur={() => {
                   field.onBlur();
@@ -583,12 +583,12 @@ export default function EmailSignatureForm({
         )}
       </div>
       {/* Border Settings */}
-      <div className="flex flex-row-reverse gap-4">
+      <div className="flex flex-wrap gap-4 justify-start">
         <Controller
           name="includeBorder"
           control={form.control}
           render={({ field }) => (
-            <Field>
+            <Field className="w-auto">
               <FieldLabel htmlFor={field.name}>Include Border</FieldLabel>
               <div className="w-auto">
                 <Switch
@@ -696,7 +696,7 @@ export default function EmailSignatureForm({
           </Field>
         )}
       />
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <Button
           type="button"
           variant="outline"
